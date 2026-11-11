@@ -1,0 +1,297 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <meta name="description" content="Organize suas atividades em um quadro Kanban simples e pessoal.">
+  <title>Meu Kanban</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="script.js"></script>
+</head>
+<body>
+  <main class="tela-login" id="tela-login">
+    <section class="cartao-login" aria-labelledby="titulo-login">
+      <a class="link-inicio" href="./index.html">← Página inicial</a>
+
+      <p class="sobretitulo">ORGANIZAÇÃO PESSOAL</p>
+
+      <h1 id="titulo-login">Acesse seu Kanban</h1>
+
+      <p class="introducao" id="introducao-login">
+        Entre para continuar organizando suas atividades.
+      </p>
+
+      <form class="formulario-login" id="formulario-login">
+        <label for="email-login">E-mail</label>
+        <input
+          id="email-login"
+          name="email"
+          type="email"
+          autocomplete="username"
+          placeholder="voce@exemplo.com"
+          required
+        >
+
+        <label for="senha-login">Senha</label>
+
+        <div class="campo-senha">
+          <input
+            id="senha-login"
+            name="senha"
+            type="password"
+            autocomplete="current-password"
+            required
+          >
+
+          <button
+            class="alternar-senha"
+            id="alternar-senha"
+            type="button"
+            aria-label="Mostrar senha"
+            aria-pressed="false"
+          >
+            Mostrar
+          </button>
+        </div>
+
+        <div id="campo-confirmar-senha" hidden>
+          <label for="confirmar-senha">Confirmar senha</label>
+          <input
+            id="confirmar-senha"
+            name="confirmar-senha"
+            type="password"
+            autocomplete="new-password"
+            placeholder="Digite sua senha novamente"
+          >
+        </div>
+
+        <p
+          class="mensagem-login"
+          id="mensagem-login"
+          role="alert"
+          aria-live="polite"
+        ></p>
+
+        <button
+          class="botao-principal botao-entrar"
+          id="botao-entrar"
+          type="submit"
+        >
+          Entrar
+        </button>
+
+        <button
+          class="botao-secundario"
+          id="alternar-cadastro"
+          type="button"
+        >
+          Não tem uma conta? Criar conta
+        </button>
+
+        <p
+          class="aviso-configuracao"
+          id="aviso-configuracao"
+          role="status"
+          hidden
+        ></p>
+      </form>
+    </section>
+  </main>
+
+  <main class="app" id="inicio" hidden>
+    <header class="topo">
+      <div>
+        <p class="sobretitulo">ORGANIZAÇÃO PESSOAL</p>
+        <h1>Meu Kanban</h1>
+        <p class="introducao">
+          Organize suas atividades, uma etapa de cada vez.
+        </p>
+      </div>
+
+      <div class="acoes-topo">
+        <span class="usuario-conectado" id="usuario-conectado"></span>
+
+        <a
+          class="botao-secundario link-pagina-inicial"
+          href="./index.html"
+        >
+          Página inicial
+        </a>
+
+        <button class="botao-secundario" id="botao-sair" type="button">
+          Sair
+        </button>
+
+        <span
+          class="salvamento"
+          id="status-salvamento"
+          role="status"
+          aria-live="polite"
+        >
+          <span class="indicador" aria-hidden="true"></span>
+          Conectando ao quadro
+        </span>
+      </div>
+    </header>
+
+    <section
+      class="quadro"
+      id="quadro"
+      aria-label="Quadro de atividades"
+    >
+      <section
+        class="coluna coluna-a-fazer"
+        data-coluna="a-fazer"
+        aria-labelledby="titulo-a-fazer"
+      >
+        <header class="cabecalho-coluna">
+          <div class="identidade-coluna">
+            <span class="ponto-coluna" aria-hidden="true"></span>
+            <h2 id="titulo-a-fazer">A Fazer</h2>
+          </div>
+          <span class="contador" aria-label="0 atividades">0</span>
+        </header>
+
+        <div
+          class="lista-atividades"
+          data-lista="a-fazer"
+          aria-label="Atividades a fazer"
+        ></div>
+
+        <button
+          class="botao-adicionar"
+          type="button"
+          data-adicionar="a-fazer"
+        >
+          <span aria-hidden="true">+</span> Adicionar atividade
+        </button>
+      </section>
+
+      <section
+        class="coluna coluna-em-andamento"
+        data-coluna="em-andamento"
+        aria-labelledby="titulo-em-andamento"
+      >
+        <header class="cabecalho-coluna">
+          <div class="identidade-coluna">
+            <span class="ponto-coluna" aria-hidden="true"></span>
+            <h2 id="titulo-em-andamento">Em Andamento</h2>
+          </div>
+          <span class="contador" aria-label="0 atividades">0</span>
+        </header>
+
+        <div
+          class="lista-atividades"
+          data-lista="em-andamento"
+          aria-label="Atividades em andamento"
+        ></div>
+
+        <button
+          class="botao-adicionar"
+          type="button"
+          data-adicionar="em-andamento"
+        >
+          <span aria-hidden="true">+</span> Adicionar atividade
+        </button>
+      </section>
+
+      <section
+        class="coluna coluna-concluido"
+        data-coluna="concluido"
+        aria-labelledby="titulo-concluido"
+      >
+        <header class="cabecalho-coluna">
+          <div class="identidade-coluna">
+            <span class="ponto-coluna" aria-hidden="true"></span>
+            <h2 id="titulo-concluido">Concluído</h2>
+          </div>
+          <span class="contador" aria-label="0 atividades">0</span>
+        </header>
+
+        <div
+          class="lista-atividades"
+          data-lista="concluido"
+          aria-label="Atividades concluídas"
+        ></div>
+
+        <button
+          class="botao-adicionar"
+          type="button"
+          data-adicionar="concluido"
+        >
+          <span aria-hidden="true">+</span> Adicionar atividade
+        </button>
+      </section>
+    </section>
+  </main>
+
+  <dialog
+    class="dialogo"
+    id="dialogo-atividade"
+    aria-labelledby="titulo-dialogo"
+  >
+    <form class="formulario" id="formulario-atividade">
+      <div class="cabecalho-dialogo">
+        <div>
+          <p class="sobretitulo">SUA ATIVIDADE</p>
+          <h2 id="titulo-dialogo">Adicionar atividade</h2>
+        </div>
+
+        <button
+          class="botao-fechar"
+          type="button"
+          id="fechar-dialogo"
+          aria-label="Fechar"
+        >
+          ×
+        </button>
+      </div>
+
+      <label for="titulo-atividade">Título</label>
+      <input
+        id="titulo-atividade"
+        name="titulo"
+        type="text"
+        maxlength="100"
+        placeholder="Ex.: Preparar apresentação"
+        required
+      >
+
+      <label for="descricao-atividade">
+        Descrição <span>(opcional)</span>
+      </label>
+
+      <textarea
+        id="descricao-atividade"
+        name="descricao"
+        rows="4"
+        maxlength="500"
+        placeholder="Adicione mais detalhes..."
+      ></textarea>
+
+      <p class="erro-formulario" id="erro-formulario" role="alert"></p>
+
+      <div class="acoes-formulario">
+        <button
+          class="botao-secundario"
+          type="button"
+          id="cancelar-dialogo"
+        >
+          Cancelar
+        </button>
+
+        <button
+          class="botao-principal"
+          type="submit"
+          id="salvar-atividade"
+        >
+          Adicionar atividade
+        </button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="aviso" id="aviso" role="alert" aria-live="assertive" hidden></div>
+</body>
+</html>
