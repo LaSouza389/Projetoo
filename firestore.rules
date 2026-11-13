@@ -2,8 +2,232 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /quadros/{uid} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+    function autenticado() {
+      return request.auth != null;
+    }
+
+    function membro(boardId) {
+      return autenticado()
+        && exists(/databases/$(database)/documents/quadros/$(boardId)/membros/$(request.auth.uid));
+    }
+
+    function papel(boardId) {
+      return get(/databases/$(database)/documents/quadros/$(boardId)/membros/$(request.auth.uid)).data.papel;
+    }
+
+    function proprietario(boardId) {
+      return membro(boardId) && papel(boardId) == 'OWNER';
+    }
+
+    function podeEditar(boardId) {
+      return membro(boardId) && papel(boardId) in ['OWNER', 'EDITOR'];
+    }
+
+    function membroAceitouConvite(boardId) {
+      let conviteId = request.resource.data.conviteId;
+      let convite = getAfter(/databases/$(database)/documents/convites/$(conviteId));
+      return request.auth.token.email_verified == true
+        && convite.data.status == 'ACEITO'
+        && convite.data.aceitoPor == request.auth.uid
+        && convite.data.email == request.auth.token.email
+        && convite.data.boardId == boardId
+        && convite.data.papel == request.resource.data.papel;
+    }
+
+    match /quadros/{boardId} {
+      allow read: if membro(boardId)
+        || (autenticado() && boardId == request.auth.uid && resource.data.atividades is list);
+
+      allow create: if autenticado()
+        && request.resource.data.donoId == request.auth.uid
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() <= 80
+        && request.resource.data.keys().hasOnly([
+          'nome', 'donoId', 'colunas', 'criadoEm', 'atualizadoEm', 'migracaoOrigem', 'migracaoStatus'
+        ])
+        && (!('migracaoOrigem' in request.resource.data)
+          || (request.resource.data.migracaoOrigem == request.auth.uid
+            && request.resource.data.migracaoStatus == 'EM_ANDAMENTO'));
+
+      allow update: if proprietario(boardId)
+        && request.resource.data.donoId == resource.data.donoId
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['nome', 'colunas', 'atualizadoEm', 'migracaoStatus'])
+        && (!request.resource.data.diff(resource.data).affectedKeys().hasAny(['migracaoStatus'])
+          || (resource.data.migracaoOrigem == request.auth.uid
+            && resource.data.migracaoStatus == 'EM_ANDAMENTO'
+            && request.resource.data.migracaoStatus == 'CONCLUIDA'))
+        && request.resource.data.nome is string
+        && request.resource.data.nome.size() > 0
+        && request.resource.data.nome.size() <= 80;
+
+      allow update: if autenticado()
+        && boardId == request.auth.uid
+        && resource.data.atividades is list
+        && request.resource.data.atividades == resource.data.atividades
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['migracaoColaborativa']);
+
+      allow delete: if false;
+
+      match /membros/{userId} {
+        allow read: if membro(boardId);
+
+        allow create: if autenticado()
+          && userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.papel == 'OWNER'
+          && getAfter(/databases/$(database)/documents/quadros/$(boardId)).data.donoId == request.auth.uid
+          && request.resource.data.keys().hasOnly(['userId', 'email', 'papel'])
+          || (autenticado()
+          && userId == request.auth.uid
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.email == request.auth.token.email
+          && request.resource.data.papel in ['EDITOR', 'VIEWER']
+          && request.resource.data.keys().hasOnly(['userId', 'email', 'papel', 'conviteId'])
+          && membroAceitouConvite(boardId));
+
+        allow update: if false;
+        allow delete: if proprietario(boardId)
+          && userId != get(/databases/$(database)/documents/quadros/$(boardId)).data.donoId;
+      }
+
+      match /tarefas/{taskId} {
+        allow read: if membro(boardId);
+        allow create: if podeEditar(boardId)
+          && request.resource.data.criadoPor == request.auth.uid
+          && request.resource.data.atualizadoPor == request.auth.uid
+          && request.resource.data.titulo is string
+          && request.resource.data.titulo.size() > 0
+          && request.resource.data.titulo.size() <= 120
+          && request.resource.data.coluna is string
+          && request.resource.data.prioridade in ['BAIXA', 'MEDIA', 'ALTA']
+          && (request.resource.data.responsavelId == null
+            || exists(/databases/$(database)/documents/quadros/$(boardId)/membros/$(request.resource.data.responsavelId)))
+          && (request.resource.data.sprintId == null
+            || exists(/databases/$(database)/documents/quadros/$(boardId)/sprints/$(request.resource.data.sprintId)))
+          && request.resource.data.keys().hasOnly([
+            'titulo', 'descricao', 'coluna', 'responsavelId', 'prazo', 'prioridade',
+            'labels', 'checklist', 'storyPoints', 'sprintId', 'criteriosAceitacao',
+            'definitionOfDone', 'atualizadoPor', 'atualizadoEm', 'criadoPor',
+            'criadoEm', 'comentariosCount', 'legadoId', 'dadosLegados'
+          ]);
+        allow update: if podeEditar(boardId)
+          && request.resource.data.criadoPor == resource.data.criadoPor
+          && request.resource.data.criadoEm == resource.data.criadoEm
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly([
+            'titulo', 'descricao', 'coluna', 'responsavelId', 'prazo', 'prioridade',
+            'labels', 'checklist', 'storyPoints', 'sprintId', 'criteriosAceitacao',
+            'definitionOfDone', 'atualizadoPor', 'atualizadoEm', 'comentariosCount'
+          ])
+          && request.resource.data.titulo is string
+          && request.resource.data.titulo.size() > 0
+          && request.resource.data.titulo.size() <= 120
+          && request.resource.data.prioridade in ['BAIXA', 'MEDIA', 'ALTA']
+          && request.resource.data.atualizadoPor == request.auth.uid
+          && (request.resource.data.responsavelId == null
+            || exists(/databases/$(database)/documents/quadros/$(boardId)/membros/$(request.resource.data.responsavelId))
+            || request.resource.data.responsavelId == resource.data.responsavelId)
+          && (request.resource.data.sprintId == null
+            || exists(/databases/$(database)/documents/quadros/$(boardId)/sprints/$(request.resource.data.sprintId)));
+        allow delete: if podeEditar(boardId);
+
+        match /comentarios/{commentId} {
+          allow read: if membro(boardId);
+          allow create: if podeEditar(boardId)
+            && exists(/databases/$(database)/documents/quadros/$(boardId)/tarefas/$(taskId))
+            && request.resource.data.autorId == request.auth.uid
+            && request.resource.data.autorEmail == request.auth.token.email
+            && request.resource.data.texto is string
+            && request.resource.data.texto.size() > 0
+            && request.resource.data.texto.size() <= 2000
+            && request.resource.data.keys().hasOnly([
+              'texto', 'autorId', 'autorEmail', 'criadoEm'
+            ]);
+          allow update, delete: if false;
+        }
+      }
+
+      match /sprints/{sprintId} {
+        allow read: if membro(boardId);
+        allow create: if proprietario(boardId)
+          && request.resource.data.nome is string
+          && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 80
+          && request.resource.data.objetivo is string
+          && (request.resource.data.inicio is string || request.resource.data.inicio == null)
+          && (request.resource.data.fim is string || request.resource.data.fim == null)
+          && request.resource.data.status in ['PLANEJADA', 'ATIVA', 'CONCLUIDA']
+          && request.resource.data.criadoEm is timestamp
+          && request.resource.data.atualizadoEm is timestamp
+          && request.resource.data.keys().hasAll([
+            'nome', 'objetivo', 'inicio', 'fim', 'status', 'criadoEm', 'atualizadoEm'
+          ])
+          && request.resource.data.keys().hasOnly([
+            'nome', 'objetivo', 'inicio', 'fim', 'status', 'criadoEm', 'atualizadoEm'
+          ]);
+        allow update: if proprietario(boardId)
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['nome', 'objetivo', 'inicio', 'fim', 'status', 'atualizadoEm'])
+          && request.resource.data.nome is string
+          && request.resource.data.nome.size() > 0
+          && request.resource.data.nome.size() <= 80
+          && request.resource.data.objetivo is string
+          && (request.resource.data.inicio is string || request.resource.data.inicio == null)
+          && (request.resource.data.fim is string || request.resource.data.fim == null)
+          && request.resource.data.status in ['PLANEJADA', 'ATIVA', 'CONCLUIDA'];
+        allow delete: if proprietario(boardId);
+      }
+
+      match /historico/{activityId} {
+        allow read: if membro(boardId);
+        allow create: if podeEditar(boardId)
+          && request.resource.data.autorId == request.auth.uid
+          && request.resource.data.autorEmail == request.auth.token.email
+          && request.resource.data.tipo is string
+          && request.resource.data.descricao is string
+          && request.resource.data.keys().hasOnly([
+            'tipo', 'descricao', 'taskId', 'autorId', 'autorEmail', 'criadoEm'
+          ]);
+        allow update, delete: if false;
+      }
+    }
+
+    match /convites/{inviteId} {
+      allow read: if autenticado()
+        && (resource.data.email == request.auth.token.email
+          || proprietario(resource.data.boardId));
+      allow create: if autenticado()
+        && proprietario(request.resource.data.boardId)
+        && request.resource.data.email is string
+        && request.resource.data.email.size() <= 254
+        && request.resource.data.papel in ['EDITOR', 'VIEWER']
+        && request.resource.data.status == 'PENDENTE'
+        && request.resource.data.convidadoPor == request.auth.uid
+        && request.resource.data.keys().hasOnly([
+          'boardId', 'boardNome', 'email', 'papel', 'status', 'convidadoPor', 'criadoEm'
+        ]);
+      allow update: if autenticado()
+        && request.auth.token.email_verified == true
+        && resource.data.status == 'PENDENTE'
+        && resource.data.email == request.auth.token.email
+        && request.resource.data.status == 'ACEITO'
+        && request.resource.data.email == resource.data.email
+        && request.resource.data.boardId == resource.data.boardId
+        && request.resource.data.papel == resource.data.papel
+        && request.resource.data.convidadoPor == resource.data.convidadoPor
+        && request.resource.data.aceitoPor == request.auth.uid
+        && request.resource.data.diff(resource.data).affectedKeys()
+          .hasOnly(['status', 'aceitoPor', 'aceitoEm'])
+        && getAfter(/databases/$(database)/documents/quadros/$(resource.data.boardId)/membros/$(request.auth.uid)).data.conviteId == inviteId;
+      allow delete: if proprietario(resource.data.boardId)
+        && resource.data.status == 'PENDENTE';
+    }
+
+    match /{path=**}/membros/{userId} {
+      allow read: if autenticado() && resource.data.userId == request.auth.uid;
     }
 
     match /{document=**} {

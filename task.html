@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f7fb">
+  <title>Tarefa | Kanban Colaborativo</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="task.js"></script>
+</head>
+<body>
+  <main class="app task-page">
+    <header class="topo">
+      <div>
+        <p class="sobretitulo">KANBAN COLABORATIVO</p>
+        <h1>Tarefa</h1>
+        <p class="introducao" id="status-tarefa">Verificando acesso…</p>
+      </div>
+      <a class="botao-secundario link-pagina-inicial" id="link-quadro" href="./index.html">Voltar ao Kanban</a>
+    </header>
+    <section class="task-layout" id="conteudo-tarefa" hidden>
+      <form class="task-form painel-secundario" id="formulario-tarefa">
+        <label for="titulo-tarefa">Título</label>
+        <input id="titulo-tarefa" maxlength="120" required>
+        <label for="descricao-tarefa">Descrição</label>
+        <textarea id="descricao-tarefa" rows="5" maxlength="4000"></textarea>
+        <div class="task-grid">
+          <div><label for="coluna-tarefa">Coluna</label><select id="coluna-tarefa"></select></div>
+          <div><label for="responsavel-tarefa">Responsável</label><select id="responsavel-tarefa"></select></div>
+          <div><label for="prazo-tarefa">Prazo</label><input id="prazo-tarefa" type="date"></div>
+          <div><label for="prioridade-tarefa">Prioridade</label><select id="prioridade-tarefa">
+            <option value="BAIXA">Baixa</option><option value="MEDIA">Média</option><option value="ALTA">Alta</option>
+          </select></div>
+          <div><label for="pontos-tarefa">Story Points</label><input id="pontos-tarefa" type="number" min="0" max="100" step="1"></div>
+          <div><label for="sprint-tarefa">Sprint</label><select id="sprint-tarefa"></select></div>
+        </div>
+        <label for="labels-tarefa">Etiquetas (separadas por vírgula)</label>
+        <input id="labels-tarefa" maxlength="600" placeholder="Bug, Feature, Urgente">
+        <label for="criterios-tarefa">Critérios de aceitação</label>
+        <textarea id="criterios-tarefa" rows="3" maxlength="4000"></textarea>
+        <label for="dod-tarefa">Definition of Done</label>
+        <textarea id="dod-tarefa" rows="3" maxlength="4000"></textarea>
+        <div class="bloco-checklist">
+          <div class="barra-secao"><h2>Checklist</h2><button class="botao-secundario" id="adicionar-checklist" type="button">+ Subtarefa</button></div>
+          <div id="itens-checklist"></div>
+        </div>
+        <p class="erro-formulario" id="erro-tarefa" role="alert"></p>
+        <button class="botao-principal" id="salvar-tarefa" type="submit">Salvar alterações</button>
+      </form>
+      <section class="painel-secundario comentarios">
+        <h2>Comentários</h2>
+        <div id="lista-comentarios"></div>
+        <form id="formulario-comentario">
+          <label for="texto-comentario">Adicionar comentário</label>
+          <textarea id="texto-comentario" rows="3" maxlength="2000" required></textarea>
+          <button class="botao-principal" id="enviar-comentario" type="submit">Comentar</button>
+        </form>
+      </section>
+    </section>
+  </main>
+</body>
+</html>

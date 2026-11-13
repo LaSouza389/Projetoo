@@ -4,97 +4,33 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f7fb">
-  <meta name="description" content="Organize suas atividades em um quadro Kanban simples e pessoal.">
-  <title>Meu Kanban</title>
+  <meta name="description" content="Organize tarefas em quadros Kanban colaborativos.">
+  <title>Kanban Colaborativo</title>
   <link rel="stylesheet" href="style.css">
   <script type="module" src="script.js"></script>
 </head>
 <body>
   <main class="tela-login" id="tela-login">
     <section class="cartao-login" aria-labelledby="titulo-login">
-      <a class="link-inicio" href="./index.html">← Página inicial</a>
-
-      <p class="sobretitulo">ORGANIZAÇÃO PESSOAL</p>
-
+      <p class="sobretitulo">KANBAN COLABORATIVO</p>
       <h1 id="titulo-login">Acesse seu Kanban</h1>
-
-      <p class="introducao" id="introducao-login">
-        Entre para continuar organizando suas atividades.
-      </p>
-
+      <p class="introducao" id="introducao-login">Entre para organizar e compartilhar suas atividades.</p>
       <form class="formulario-login" id="formulario-login">
         <label for="email-login">E-mail</label>
-        <input
-          id="email-login"
-          name="email"
-          type="email"
-          autocomplete="username"
-          placeholder="voce@exemplo.com"
-          required
-        >
-
+        <input id="email-login" name="email" type="email" autocomplete="username" required>
         <label for="senha-login">Senha</label>
-
         <div class="campo-senha">
-          <input
-            id="senha-login"
-            name="senha"
-            type="password"
-            autocomplete="current-password"
-            required
-          >
-
-          <button
-            class="alternar-senha"
-            id="alternar-senha"
-            type="button"
-            aria-label="Mostrar senha"
-            aria-pressed="false"
-          >
-            Mostrar
-          </button>
+          <input id="senha-login" name="senha" type="password" autocomplete="current-password" required>
+          <button class="alternar-senha" id="alternar-senha" type="button" aria-label="Mostrar senha">Mostrar</button>
         </div>
-
         <div id="campo-confirmar-senha" hidden>
           <label for="confirmar-senha">Confirmar senha</label>
-          <input
-            id="confirmar-senha"
-            name="confirmar-senha"
-            type="password"
-            autocomplete="new-password"
-            placeholder="Digite sua senha novamente"
-          >
+          <input id="confirmar-senha" name="confirmar-senha" type="password" autocomplete="new-password">
         </div>
-
-        <p
-          class="mensagem-login"
-          id="mensagem-login"
-          role="alert"
-          aria-live="polite"
-        ></p>
-
-        <button
-          class="botao-principal botao-entrar"
-          id="botao-entrar"
-          type="submit"
-        >
-          Entrar
-        </button>
-
-        <button
-          class="botao-secundario"
-          id="alternar-cadastro"
-          type="button"
-        >
-          Não tem uma conta? Criar conta
-        </button>
-
-        <p
-          class="aviso-configuracao"
-          id="aviso-configuracao"
-          role="status"
-          hidden
-        ></p>
+        <p class="mensagem-login" id="mensagem-login" role="alert" aria-live="polite"></p>
+        <button class="botao-principal botao-entrar" id="botao-entrar" type="submit">Entrar</button>
+        <button class="botao-secundario" id="alternar-cadastro" type="button">Não tem conta? Criar conta</button>
+        <p class="aviso-configuracao" id="aviso-configuracao" role="status" hidden></p>
       </form>
     </section>
   </main>
@@ -102,196 +38,88 @@
   <main class="app" id="inicio" hidden>
     <header class="topo">
       <div>
-        <p class="sobretitulo">ORGANIZAÇÃO PESSOAL</p>
-        <h1>Meu Kanban</h1>
-        <p class="introducao">
-          Organize suas atividades, uma etapa de cada vez.
-        </p>
+        <p class="sobretitulo">KANBAN COLABORATIVO</p>
+        <h1 id="titulo-aplicacao">Meus quadros</h1>
+        <p class="introducao" id="subtitulo-aplicacao">Organize o trabalho com sua equipe.</p>
       </div>
-
       <div class="acoes-topo">
         <span class="usuario-conectado" id="usuario-conectado"></span>
-
-        <a
-          class="botao-secundario link-pagina-inicial"
-          href="./index.html"
-        >
-          Página inicial
-        </a>
-
-        <button class="botao-secundario" id="botao-sair" type="button">
-          Sair
-        </button>
-
-        <span
-          class="salvamento"
-          id="status-salvamento"
-          role="status"
-          aria-live="polite"
-        >
-          <span class="indicador" aria-hidden="true"></span>
-          Conectando ao quadro
+        <button class="botao-secundario" id="botao-voltar-quadros" type="button" hidden>Meus quadros</button>
+        <button class="botao-secundario" id="botao-sair" type="button">Sair</button>
+        <span class="salvamento" id="status-salvamento" role="status" aria-live="polite">
+          <span class="indicador" aria-hidden="true"></span><span id="texto-status">Conectando</span>
         </span>
       </div>
     </header>
+    <section class="aviso-email" id="aviso-email" hidden role="status">
+      <p>Para aceitar convites, confirme o endereço de e-mail desta conta.</p>
+      <button class="botao-secundario" id="botao-reenviar-verificacao" type="button">Reenviar verificação</button>
+      <button class="botao-secundario" id="botao-confirmar-verificacao" type="button">Já verifiquei</button>
+    </section>
 
-    <section
-      class="quadro"
-      id="quadro"
-      aria-label="Quadro de atividades"
-    >
-      <section
-        class="coluna coluna-a-fazer"
-        data-coluna="a-fazer"
-        aria-labelledby="titulo-a-fazer"
-      >
-        <header class="cabecalho-coluna">
-          <div class="identidade-coluna">
-            <span class="ponto-coluna" aria-hidden="true"></span>
-            <h2 id="titulo-a-fazer">A Fazer</h2>
-          </div>
-          <span class="contador" aria-label="0 atividades">0</span>
-        </header>
-
-        <div
-          class="lista-atividades"
-          data-lista="a-fazer"
-          aria-label="Atividades a fazer"
-        ></div>
-
-        <button
-          class="botao-adicionar"
-          type="button"
-          data-adicionar="a-fazer"
-        >
-          <span aria-hidden="true">+</span> Adicionar atividade
-        </button>
+    <section id="vista-quadros">
+      <div class="barra-secao">
+        <div><h2>Meus quadros</h2><p>Quadros que você criou.</p></div>
+        <button class="botao-principal" id="botao-criar-quadro" type="button">+ Novo quadro</button>
+      </div>
+      <div class="grade-quadros" id="lista-quadros"></div>
+      <div class="barra-secao"><div><h2>Compartilhados comigo</h2><p>Quadros em que você participa.</p></div></div>
+      <div class="grade-quadros" id="lista-quadros-compartilhados"></div>
+      <section class="painel-secundario">
+        <div class="barra-secao">
+          <div><h2>Convites recebidos</h2><p>Convites enviados ao e-mail da sua conta.</p></div>
+        </div>
+        <div id="lista-convites" class="lista-convites"></div>
       </section>
+      <details class="painel-migracao">
+        <summary>Migrar atividades do quadro antigo</summary>
+        <p>A migração cria um quadro separado. O documento antigo e suas atividades não serão apagados. A ação é manual e pode ser verificada antes de executá-la.</p>
+        <button class="botao-secundario" id="botao-migrar" type="button">Verificar e migrar quadro antigo</button>
+        <span id="status-migracao" role="status"></span>
+      </details>
+    </section>
 
-      <section
-        class="coluna coluna-em-andamento"
-        data-coluna="em-andamento"
-        aria-labelledby="titulo-em-andamento"
-      >
-        <header class="cabecalho-coluna">
-          <div class="identidade-coluna">
-            <span class="ponto-coluna" aria-hidden="true"></span>
-            <h2 id="titulo-em-andamento">Em Andamento</h2>
-          </div>
-          <span class="contador" aria-label="0 atividades">0</span>
-        </header>
-
-        <div
-          class="lista-atividades"
-          data-lista="em-andamento"
-          aria-label="Atividades em andamento"
-        ></div>
-
-        <button
-          class="botao-adicionar"
-          type="button"
-          data-adicionar="em-andamento"
-        >
-          <span aria-hidden="true">+</span> Adicionar atividade
-        </button>
+    <section id="vista-quadro" hidden>
+      <div class="barra-secao cabecalho-board">
+        <div><p class="sobretitulo" id="papel-quadro"></p><h2 id="nome-quadro"></h2><p id="descricao-quadro"></p></div>
+        <div class="acoes-board">
+          <button class="botao-secundario" id="botao-editar-quadro" type="button">Configurar quadro</button>
+          <button class="botao-secundario" id="botao-convidar" type="button">Convidar</button>
+          <button class="botao-secundario" id="botao-participantes" type="button">Participantes</button>
+          <button class="botao-secundario" id="botao-sprints" type="button">Sprints</button>
+          <button class="botao-secundario" id="botao-historico" type="button">Histórico</button>
+        </div>
+      </div>
+      <section id="painel-participantes" class="painel-secundario" hidden>
+        <h3>Participantes</h3><div id="lista-participantes"></div>
       </section>
-
-      <section
-        class="coluna coluna-concluido"
-        data-coluna="concluido"
-        aria-labelledby="titulo-concluido"
-      >
-        <header class="cabecalho-coluna">
-          <div class="identidade-coluna">
-            <span class="ponto-coluna" aria-hidden="true"></span>
-            <h2 id="titulo-concluido">Concluído</h2>
-          </div>
-          <span class="contador" aria-label="0 atividades">0</span>
-        </header>
-
-        <div
-          class="lista-atividades"
-          data-lista="concluido"
-          aria-label="Atividades concluídas"
-        ></div>
-
-        <button
-          class="botao-adicionar"
-          type="button"
-          data-adicionar="concluido"
-        >
-          <span aria-hidden="true">+</span> Adicionar atividade
-        </button>
+      <section id="painel-sprints" class="painel-secundario" hidden>
+        <div class="barra-secao"><h3>Sprints</h3><button class="botao-principal" id="botao-nova-sprint" type="button">+ Nova sprint</button></div>
+        <div id="lista-sprints"></div>
+      </section>
+      <section id="painel-historico" class="painel-secundario" hidden>
+        <h3>Histórico recente — informativo</h3>
+        <p>Registro colaborativo para consulta; não é uma trilha de auditoria inviolável.</p>
+        <ol id="lista-historico"></ol>
+      </section>
+      <p class="introducao">O limite WIP é validado pela interface. As regras do Firestore não conseguem garantir o limite contra gravações diretas ou simultâneas.</p>
+      <section class="quadro" id="quadro" aria-label="Quadro Kanban"></section>
+      <section class="backlog">
+        <header class="cabecalho-coluna"><div class="identidade-coluna"><span class="ponto-coluna"></span><h2>Backlog</h2></div><span class="contador" id="contador-backlog">0</span></header>
+        <div class="lista-atividades" id="lista-backlog"></div>
+        <button class="botao-adicionar" type="button" id="botao-adicionar-backlog">+ Adicionar ao backlog</button>
       </section>
     </section>
   </main>
 
-  <dialog
-    class="dialogo"
-    id="dialogo-atividade"
-    aria-labelledby="titulo-dialogo"
-  >
-    <form class="formulario" id="formulario-atividade">
-      <div class="cabecalho-dialogo">
-        <div>
-          <p class="sobretitulo">SUA ATIVIDADE</p>
-          <h2 id="titulo-dialogo">Adicionar atividade</h2>
-        </div>
-
-        <button
-          class="botao-fechar"
-          type="button"
-          id="fechar-dialogo"
-          aria-label="Fechar"
-        >
-          ×
-        </button>
-      </div>
-
-      <label for="titulo-atividade">Título</label>
-      <input
-        id="titulo-atividade"
-        name="titulo"
-        type="text"
-        maxlength="100"
-        placeholder="Ex.: Preparar apresentação"
-        required
-      >
-
-      <label for="descricao-atividade">
-        Descrição <span>(opcional)</span>
-      </label>
-
-      <textarea
-        id="descricao-atividade"
-        name="descricao"
-        rows="4"
-        maxlength="500"
-        placeholder="Adicione mais detalhes..."
-      ></textarea>
-
-      <p class="erro-formulario" id="erro-formulario" role="alert"></p>
-
-      <div class="acoes-formulario">
-        <button
-          class="botao-secundario"
-          type="button"
-          id="cancelar-dialogo"
-        >
-          Cancelar
-        </button>
-
-        <button
-          class="botao-principal"
-          type="submit"
-          id="salvar-atividade"
-        >
-          Adicionar atividade
-        </button>
-      </div>
+  <dialog class="dialogo" id="dialogo">
+    <form class="formulario" id="formulario-dialogo">
+      <div class="cabecalho-dialogo"><div><p class="sobretitulo" id="rotulo-dialogo">KANBAN</p><h2 id="titulo-dialogo"></h2></div><button class="botao-fechar" id="fechar-dialogo" type="button" aria-label="Fechar">×</button></div>
+      <div id="campos-dialogo"></div>
+      <p class="erro-formulario" id="erro-dialogo" role="alert"></p>
+      <div class="acoes-formulario"><button class="botao-secundario" id="cancelar-dialogo" type="button">Cancelar</button><button class="botao-principal" id="salvar-dialogo" type="submit">Salvar</button></div>
     </form>
   </dialog>
-
   <div class="aviso" id="aviso" role="alert" aria-live="assertive" hidden></div>
 </body>
 </html>
